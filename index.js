@@ -13,7 +13,7 @@ var mqtt = require("mqtt");
 
 db.sequelize.sync();
 var corsOptions = {
-  origin: "http://localhost:3000",
+  origin: ["http://localhost:3000","http://itdev.cmtc.ac.th:2004"],
 };
 app.use(cors(corsOptions));
 // parse requests of content-type - application/json
@@ -208,7 +208,7 @@ const options = {
 
 // simple route
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to bezkoder application." });
+  res.json({ message: "Nothing here :(" });
 });
 app.get("/sensorData", async (req, res) => {
     const sensorDatas = await SensorData.findAll();
