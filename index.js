@@ -143,7 +143,7 @@ const options = {
   //Define the array of data from the sensors
   let deviceArray = [];
   function writeToDatabase(data) {
-      if(deviceArray.temp >31){
+      if(deviceArray.temp >35){
           lineNotify.notify({
               message: 'ตอนนี้อุณหภูมิห้อง Server สูงกว่า 30 องศา',
             }).then(() => {
