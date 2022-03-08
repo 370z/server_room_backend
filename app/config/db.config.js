@@ -1,8 +1,8 @@
 module.exports = {
-  HOST: "ichigozcloud.ml",
-  USER: "maeteeps_11",
-  PASSWORD: "11111111",
-  DB: "maeteeps_11",
+  HOST: "itdev.cmtc.ac.th",
+  USER: "root",
+  PASSWORD: "3fNjbOqfX7hy2lGPZZgtNA==",
+  DB: "server_room_temp",
   dialect: "mysql",
   timezone: "Asia/Bangkok",
   pool: {
