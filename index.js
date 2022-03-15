@@ -158,23 +158,9 @@ aedes.on("publish", async function (packet, client, message) {
   }
 });
 
-
-  aedes.on("message", async function (topic, message) {
-    await getLineToken();
-    if (line_token != null || line_token != "none" || notify_setting != null) {
-      if (topic.temp > notify_setting) {
-        await lineNotify
-          .notify({
-            message: `ตอนนี้อุณหภูมิห้อง Server สูงกว่า ${notify_setting} องศา`,
-          })
-          .then(() => {
-            console.log("send completed!");
-          });
-      }
-    }
-    console.log(`[MESSAGE_RECEIVED] Message received on topic ${topic}`);
-  })
-;
+aedes.on("message", async function (topic, message) {
+  console.log(`[MESSAGE_RECEIVED] Message received on topic ${topic}`);
+});
 
 // mqtt client
 const options = {
@@ -218,7 +204,19 @@ client.on("connect", function () {
   console.log("Connected to MQTT Server");
 });
 
-client.on("message", function (topic, message, packet) {
+client.on("message", async function (topic, message, packet) {
+  await getLineToken();
+  if (line_token != null || line_token != "none" || notify_setting != null) {
+    if (topic.temp > notify_setting) {
+      await lineNotify
+        .notify({
+          message: `ตอนนี้อุณหภูมิห้อง Server สูงกว่า ${notify_setting} องศา`,
+        })
+        .then(() => {
+          console.log("send completed!");
+        });
+    }
+  }
   if (
     (topic && topic.match("hourtemp")) ||
     topic.match("hourhumi") ||
