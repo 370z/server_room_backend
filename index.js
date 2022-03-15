@@ -4,8 +4,8 @@ const cors = require("cors");
 const app = express();
 const db = require("./app/models");
 const Op = db.Sequelize.Op;
-
 const User = db.userData;
+const SensorData = db.sensorData;
 var line_token = "none";
 
 //mqtt client
@@ -215,7 +215,7 @@ client.on("connect", function () {
 });
 
 client.on("message", function (topic, message, packet) {
-  if (topic) {
+  if (topic &&topic.match("hourtemp")||topic.match("hourhumi")||topic.match("hourcommit")) {
     device = deviceArray;
     // console.log(device);
     if (topic == "hourcommit") {
@@ -224,7 +224,7 @@ client.on("message", function (topic, message, packet) {
         device.hourtemp != undefined &&
         device.hourhumi != undefined
       ) {
-        // console.log(device);
+        console.log(device);
         writeToDatabase(device);
       }
     } else {
