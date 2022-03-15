@@ -3,17 +3,48 @@ const express = require("express");
 const cors = require("cors");
 const app = express();
 const db = require("./app/models");
-const SensorData = db.sensorData;
 const Op = db.Sequelize.Op;
-// LINE notify
-const lineNotify = require('line-notify-nodejs')('eFkTnYOc15tgoMCprw1C4oKHHY4m3gdvDNsez6GAPen');
+
+const User = db.userData;
+var line_token = "none";
+
 //mqtt client
 var mqtt = require("mqtt");
 
-
 db.sequelize.sync();
+// db.sequelize.sync({ force: true }).then(async () => {
+//   const user = {
+//     username: `admin`,
+//     password: "admin",
+//   };
+//   try {
+//     await User.create(user);
+//   } catch (error) {
+//     console.log(error);
+//   }
+// });
+const getLineToken = async () => {
+  try {
+    const user = await User.findOne({
+      where: {
+        username: "admin",
+      },
+    });
+
+    if (user) {
+      this.line_token = user.line_token;
+      console.log("asdasdasdasdasdasdasdasdasdasdasdas", user.line_token);
+    }
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+// LINE notify
+const lineNotify = require("line-notify-nodejs")(line_token);
+
 var corsOptions = {
-  origin: ["http://localhost:3000","http://itdev.cmtc.ac.th:2004"],
+  origin: ["http://localhost:3000", "http://itdev.cmtc.ac.th:2004"],
 };
 app.use(cors(corsOptions));
 // parse requests of content-type - application/json
@@ -62,7 +93,10 @@ aedes.authorizePublish = (client, packet, callback) => {
     packet.topic === "inTopic" ||
     packet.topic === "temp" ||
     packet.topic === "humi" ||
-    packet.topic === "commit"
+    packet.topic === "commit" ||
+    packet.topic === "hourtemp" ||
+    packet.topic === "hourhumi" ||
+    packet.topic === "hourcommit"
   ) {
     return callback(null);
   }
@@ -123,37 +157,41 @@ aedes.on("publish", async function (packet, client, message) {
   }
 });
 
-aedes.on("message", async function (topic, message) {
-  console.log(`[MESSAGE_RECEIVED] Message received on topic ${topic}`);
-});
+getLineToken().then(
+  aedes.on("message", async function (topic, message) {
+    if (topic.temp > 35) {
+      lineNotify
+        .notify({
+          message: "ตอนนี้อุณหภูมิห้อง Server สูงกว่า 30 องศา",
+        })
+        .then(() => {
+          console.log("send completed!");
+        });
+    }
+    console.log(`[MESSAGE_RECEIVED] Message received on topic ${topic}`);
+  })
+);
 
 // mqtt client
 const options = {
-    // Clean session
-    clean: true,
-    connectTimeout: 4000,
-    // Auth
-    clientId: "backend_server",
-    username: "admin",
-    password: "admin",
-  };
-  //Connect to the MQTT Server
-  var client = mqtt.connect("mqtt://localhost:1883", options);
-  
-  //Define the array of data from the sensors
-  let deviceArray = [];
-  function writeToDatabase(data) {
-      if(deviceArray.temp >35){
-          lineNotify.notify({
-              message: 'ตอนนี้อุณหภูมิห้อง Server สูงกว่า 30 องศา',
-            }).then(() => {
-              console.log('send completed!');
-            });
-      }
-        // Create a Tutorial
+  // Clean session
+  clean: true,
+  connectTimeout: 4000,
+  // Auth
+  clientId: "backend_server",
+  username: "admin",
+  password: "admin",
+};
+//Connect to the MQTT Server
+var client = mqtt.connect("mqtt://localhost:1883", options);
+
+//Define the array of data from the sensors
+let deviceArray = [];
+function writeToDatabase(data) {
+  // Create a Tutorial
   const sensorData = {
-    temp: data.temp,
-    humi: data.humi,
+    temp: data.hourtemp,
+    humi: data.hourhumi,
   };
 
   // Save Tutorial in the database
@@ -164,56 +202,63 @@ const options = {
     .catch((err) => {
       console.log(err);
     });
-  }
-  
-  client.on("connect", function () {
-    client.subscribe("temp");
-    client.subscribe("humi");
-    client.subscribe("commit");
-    console.log("Connected to MQTT Server");
-  });
-  
-  client.on("message", function (topic, message, packet) {
-    if (topic) {
-      device = deviceArray;
-      console.log(device);
-      if (topic == "commit") {
-        if (
-          deviceArray != [] &&
-          device.temp != undefined &&
-          device.humi != undefined
-        ) {
-          console.log(device);
-          writeToDatabase(device);
-        }
-      } else {
-        if (device == []) {
-          console.log("Creating Object ");
-          device = new Object();
-          //Setup the object with the base data so it is easier to write the SQL.
-          device.temp = 0;
-          device.humi = 0;
-          eval("device." + topic + "=" + message);
-          deviceArray.push(device);
-        } else {
-          console.log("Adding value " + topic + "=" + message);
-          eval("device." + topic + "=" + message);
-        }
+}
+
+client.on("connect", function () {
+  client.subscribe("temp");
+  client.subscribe("humi");
+  client.subscribe("hourtemp");
+  client.subscribe("hourhumi");
+  client.subscribe("hourcommit");
+  client.subscribe("commit");
+  console.log("Connected to MQTT Server");
+});
+
+client.on("message", function (topic, message, packet) {
+  if (topic) {
+    device = deviceArray;
+    // console.log(device);
+    if (topic == "hourcommit") {
+      if (
+        deviceArray != [] &&
+        device.hourtemp != undefined &&
+        device.hourhumi != undefined
+      ) {
+        // console.log(device);
+        writeToDatabase(device);
       }
     } else {
-      console.log("message is " + message);
-      console.log("topic is " + topic);
+      if (device == []) {
+        console.log("Creating Object ");
+        device = new Object();
+        //Setup the object with the base data so it is easier to write the SQL.
+        device.hourtemp = 0;
+        device.hourhumi = 0;
+        eval("device." + topic + "=" + message);
+        deviceArray.push(device);
+      } else {
+        console.log("Adding value " + topic + "=" + message);
+        eval("device." + topic + "=" + message);
+      }
     }
-  });
+  } else {
+    console.log("message is " + message);
+    console.log("topic is " + topic);
+  }
+});
+// const auth = require("./app/routes/auth.routes");
+const sensorData = require("./app/routes/sensorData.routes");
+const userData = require("./app/routes/userData.routes");
+
+// app.use("/api/v1", auth);
+app.use("/api/v1", sensorData);
+app.use("/api/v1", userData);
 
 // simple route
 app.get("/", (req, res) => {
   res.json({ message: "Nothing here :(" });
 });
-app.get("/sensorData", async (req, res) => {
-    const sensorDatas = await SensorData.findAll();
-    res.json(sensorDatas);
-});
+
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {

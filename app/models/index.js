@@ -17,4 +17,5 @@ const db = {};
 db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 db.sensorData = require("./sensorData.model.js")(sequelize, Sequelize);
+db.userData = require("./userData.model.js")(sequelize, Sequelize);
 module.exports = db;

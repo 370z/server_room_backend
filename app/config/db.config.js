@@ -5,7 +5,7 @@ module.exports = {
   PASSWORD: "3fNjbOqfX7hy2lGPZZgtNA==",
   DB: "server_room_temp",
   dialect: "mysql",
-  timezone: "Asia/Bangkok",
+  timezone: "+07:00",
   pool: {
     max: 5,
     min: 0,
