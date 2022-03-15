@@ -7,6 +7,7 @@ const Op = db.Sequelize.Op;
 const User = db.userData;
 const SensorData = db.sensorData;
 var line_token = "none";
+var notify_setting = null;
 
 //mqtt client
 var mqtt = require("mqtt");
@@ -33,7 +34,7 @@ const getLineToken = async () => {
 
     if (user) {
       this.line_token = user.line_token;
-      console.log("asdasdasdasdasdasdasdasdasdasdasdas", user.line_token);
+      this.notify_setting = parseFloat(user.notify_setting);
     }
   } catch (error) {
     console.log(error);
@@ -159,14 +160,16 @@ aedes.on("publish", async function (packet, client, message) {
 
 getLineToken().then(
   aedes.on("message", async function (topic, message) {
-    if (topic.temp > 35) {
-      lineNotify
-        .notify({
-          message: "ตอนนี้อุณหภูมิห้อง Server สูงกว่า 30 องศา",
-        })
-        .then(() => {
-          console.log("send completed!");
-        });
+    if (line_token != null || line_token != "none" || notify_setting != null) {
+      if (topic.temp > notify_setting) {
+        lineNotify
+          .notify({
+            message: `ตอนนี้อุณหภูมิห้อง Server สูงกว่า ${notify_setting} องศา`,
+          })
+          .then(() => {
+            console.log("send completed!");
+          });
+      }
     }
     console.log(`[MESSAGE_RECEIVED] Message received on topic ${topic}`);
   })
@@ -215,7 +218,11 @@ client.on("connect", function () {
 });
 
 client.on("message", function (topic, message, packet) {
-  if (topic &&topic.match("hourtemp")||topic.match("hourhumi")||topic.match("hourcommit")) {
+  if (
+    (topic && topic.match("hourtemp")) ||
+    topic.match("hourhumi") ||
+    topic.match("hourcommit")
+  ) {
     device = deviceArray;
     // console.log(device);
     if (topic == "hourcommit") {
