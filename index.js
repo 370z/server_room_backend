@@ -158,11 +158,12 @@ aedes.on("publish", async function (packet, client, message) {
   }
 });
 
-getLineToken().then(
+
   aedes.on("message", async function (topic, message) {
+    await getLineToken();
     if (line_token != null || line_token != "none" || notify_setting != null) {
       if (topic.temp > notify_setting) {
-        lineNotify
+        await lineNotify
           .notify({
             message: `ตอนนี้อุณหภูมิห้อง Server สูงกว่า ${notify_setting} องศา`,
           })
@@ -173,7 +174,7 @@ getLineToken().then(
     }
     console.log(`[MESSAGE_RECEIVED] Message received on topic ${topic}`);
   })
-);
+;
 
 // mqtt client
 const options = {
