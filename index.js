@@ -7,7 +7,7 @@ const Op = db.Sequelize.Op;
 const User = db.userData;
 const SensorData = db.sensorData;
 const axios = require("axios");
-const qs = require("querystring");
+const querystring = require("querystring");
 const BASE_URL = "https://notify-api.line.me";
 const PATH = "/api/notify";
 // LINE notify
@@ -36,22 +36,6 @@ app.use(cors(corsOptions));
 app.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
-
-async function lineNotify(params) {
-  console.log(params);
-  if (!params.message) {
-    throw new Error("message is required");
-  }
-
-  const options = {
-    headers: {
-      "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Bearer ${params.line_token}`,
-    },
-  };
-
-  await axios.post(`${BASE_URL}${PATH}`, { message: params.message }, options);
-}
 
 const aedes = require("aedes")();
 const server = require("net").createServer(aedes.handle);
@@ -216,12 +200,22 @@ client.on("message", async function (topic, message, packet) {
           message.toString() > user.notify_setting
         );
         if (message.toString() > user.notify_setting) {
-          await lineNotify({
-            message: `ตอนนี้อุณหภูมิห้อง Server สูงกว่า ${user.notify_setting} องศา`,
-            line_token: user.line_token,
-          }).then(() => {
-            console.log("send completed!");
-          });
+          await axios
+            .post(
+              `${BASE_URL}${PATH}`,
+              {
+                message: `ตอนนี้อุณหภูมิห้อง Server สูงกว่า ${user.notify_setting} องศา`,
+              },
+              {
+                headers: {
+                  "Content-Type": "application/x-www-form-urlencoded",
+                  Authorization: `Bearer ${user.line_token}`,
+                },
+              }
+            )
+            .then(() => {
+              console.log("send completed!");
+            });
         }
       }
     } catch (error) {
