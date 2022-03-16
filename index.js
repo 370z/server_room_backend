@@ -191,7 +191,7 @@ client.on("message", function (topic, message, packet) {
       console.log("message on query: ",message);
       if (user) {
         lineNotify.token = user.line_token;
-        if (message > user.notify_setting) {
+        if (parseFloat(message.toString()) > user.notify_setting) {
           lineNotify
             .notify({
               message: `ตอนนี้อุณหภูมิห้อง Server สูงกว่า ${notify_setting} องศา`,
