@@ -176,6 +176,7 @@ const options = {
 var client = mqtt.connect("mqtt://localhost:1883", options);
 
 //Define the array of data from the sensors
+let realtimeSensor = [];
 let deviceArray = [];
 function writeToDatabase(data) {
   // Create a Tutorial
@@ -206,8 +207,8 @@ client.on("connect", function () {
 
 client.on("message", async function (topic, message, packet) {
   await getLineToken();
-  if (line_token != null || line_token != "none" || notify_setting != null) {
-    if (topic.temp > notify_setting) {
+  if (notify_setting != null) {
+    if (realtimeSensor.temp > notify_setting) {
       await lineNotify
         .notify({
           message: `ตอนนี้อุณหภูมิห้อง Server สูงกว่า ${notify_setting} องศา`,
@@ -217,6 +218,7 @@ client.on("message", async function (topic, message, packet) {
         });
     }
   }
+
   if (
     (topic && topic.match("hourtemp")) ||
     topic.match("hourhumi") ||
@@ -250,6 +252,12 @@ client.on("message", async function (topic, message, packet) {
   } else {
     console.log("message is " + message);
     console.log("topic is " + topic);
+    if (topic == "temp") {
+      realtimeSensor = new Object();
+      device.temp = 0;
+      eval("realtimeSensor." + topic + "=" + message);
+      realtimeSensor.push(realtimeSensor);
+    }
   }
 });
 // const auth = require("./app/routes/auth.routes");
