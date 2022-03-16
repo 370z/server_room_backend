@@ -7,7 +7,7 @@ const Op = db.Sequelize.Op;
 const User = db.userData;
 const SensorData = db.sensorData;
 // LINE notify
-const lineNotify = require("line-notify-nodejs");
+const lineNotify = require("line-notify-nodejs")();
 //mqtt client
 var mqtt = require("mqtt");
 
