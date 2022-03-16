@@ -7,7 +7,7 @@ const Op = db.Sequelize.Op;
 const User = db.userData;
 const SensorData = db.sensorData;
 const axios = require("axios");
-const querystring = require("querystring");
+const qs = require("querystring");
 const BASE_URL = "https://notify-api.line.me";
 const PATH = "/api/notify";
 // LINE notify
@@ -188,6 +188,12 @@ client.on("connect", function () {
   console.log("Connected to MQTT Server");
 });
 
+const requestOption = {
+  method: "POST",
+  headers: { "content-type": "application/x-www-form-urlencoded" },
+  data: qs.stringify(jsonData),
+  url,
+};
 client.on("message", async function (topic, message, packet) {
   if (topic === "temp") {
     try {
@@ -204,7 +210,9 @@ client.on("message", async function (topic, message, packet) {
             .post(
               `${BASE_URL}${PATH}`,
               {
-                message: `ตอนนี้อุณหภูมิห้อง Server สูงกว่า ${user.notify_setting} องศา`,
+                data: qs.stringify({
+                  message: `ตอนนี้อุณหภูมิห้อง Server สูงกว่า ${user.notify_setting} องศา`,
+                }),
               },
               {
                 headers: {
