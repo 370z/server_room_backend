@@ -28,6 +28,7 @@ async function getLineToken() {
   try {
     const user = await User.findByPk(1);
     if (user) {
+      console.log(user.line_token,user.notify_setting)
       return {
         line_token: user.line_token,
         notify_setting: parseFloat(user.notify_setting),
