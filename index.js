@@ -187,7 +187,7 @@ client.on("connect", function () {
 client.on("message", function (topic, message, packet) {
   if (topic === "temp") {
     try {
-      const user = await User.findByPk(1);
+      const user = User.findByPk(1);
       if (user) {
         lineNotify.token = user.line_token;
         if (message > user.notify_setting) {
