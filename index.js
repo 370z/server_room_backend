@@ -24,7 +24,7 @@ db.sequelize.sync();
 // });
 var line_token = "none";
 var notify_setting = null;
-function getLineToken() {
+async function getLineToken() {
   try {
     const user = await User.findByPk({
       where: {
