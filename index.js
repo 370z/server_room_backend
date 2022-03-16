@@ -188,7 +188,6 @@ client.on("connect", function () {
   console.log("Connected to MQTT Server");
 });
 
-
 client.on("message", async function (topic, message, packet) {
   if (topic === "temp") {
     try {
@@ -204,11 +203,9 @@ client.on("message", async function (topic, message, packet) {
           await axios
             .post(
               `${BASE_URL}${PATH}`,
-              {
-                data: qs.stringify({
-                  message: `ตอนนี้อุณหภูมิห้อง Server สูงกว่า ${user.notify_setting} องศา`,
-                }),
-              },
+              qs.stringify({
+                message: `ตอนนี้อุณหภูมิห้อง Server สูงกว่า ${user.notify_setting} องศา`,
+              }),
               {
                 headers: {
                   "Content-Type": "application/x-www-form-urlencoded",
