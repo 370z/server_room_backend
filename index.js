@@ -253,10 +253,11 @@ client.on("message", async function (topic, message, packet) {
     console.log("message is " + message);
     console.log("topic is " + topic);
     if (topic == "temp") {
-      realtimeSensor = new Object();
-      realtimeSensor.temp = 0;
-      eval("realtimeSensor." + topic + "=" + message);
-      realtimeSensor.push(realtimeSensor);
+      let realtimeObj =[];
+      realtimeObj = new Object();
+      realtimeObj.temp = 0;
+      eval("realtimeObj." + topic + "=" + message);
+      realtimeSensor.push(realtimeObj);
     }
   }
 });
