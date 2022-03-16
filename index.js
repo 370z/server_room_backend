@@ -188,12 +188,7 @@ client.on("connect", function () {
   console.log("Connected to MQTT Server");
 });
 
-const requestOption = {
-  method: "POST",
-  headers: { "content-type": "application/x-www-form-urlencoded" },
-  data: qs.stringify(jsonData),
-  url,
-};
+
 client.on("message", async function (topic, message, packet) {
   if (topic === "temp") {
     try {
