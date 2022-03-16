@@ -6,10 +6,8 @@ const db = require("./app/models");
 const Op = db.Sequelize.Op;
 const User = db.userData;
 const SensorData = db.sensorData;
-var line_token = "none";
-var notify_setting = null;
 // LINE notify
-const lineNotify = require("line-notify-nodejs")(line_token);
+const lineNotify = require("line-notify-nodejs");
 //mqtt client
 var mqtt = require("mqtt");
 
@@ -25,20 +23,6 @@ db.sequelize.sync();
 //     console.log(error);
 //   }
 // });
-
-function getLineToken() {
-  User.findByPk(1)
-    .then((user) => {
-      if (user) {
-        console.log(user.line_token, user.notify_setting);
-        line_token = user.line_token;
-        notify_setting = user.notify_setting;
-      }
-    })
-    .catch((err) => {
-      console.log(err);
-    });
-}
 
 var corsOptions = {
   origin: ["http://localhost:3000", "http://itdev.cmtc.ac.th:2004"],
@@ -197,17 +181,16 @@ client.on("connect", function () {
   client.subscribe("hourtemp");
   client.subscribe("hourhumi");
   client.subscribe("hourcommit");
-  client.subscribe("commit");
   console.log("Connected to MQTT Server");
 });
 
 client.on("message", function (topic, message, packet) {
-  console.log("notify_before", notify_setting);
-  console.log("token_before", line_token);
-  getLineToken()
-    .then(() => {
-      if (notify_setting != null) {
-        if (realtimeSensor.temp > notify_setting) {
+  if (topic === "temp") {
+    try {
+      const user = await User.findByPk(1);
+      if (user) {
+        lineNotify.token = user.line_token;
+        if (message > user.notify_setting) {
           lineNotify
             .notify({
               message: `ตอนนี้อุณหภูมิห้อง Server สูงกว่า ${notify_setting} องศา`,
@@ -217,11 +200,10 @@ client.on("message", function (topic, message, packet) {
             });
         }
       }
-    })
-    .catch((error) => {
+    } catch (error) {
       console.log(error);
-    });
-
+    }
+  }
   if (
     (topic && topic.match("hourtemp")) ||
     topic.match("hourhumi") ||
@@ -255,13 +237,13 @@ client.on("message", function (topic, message, packet) {
   } else {
     console.log("message is " + message);
     console.log("topic is " + topic);
-    if (topic == "temp") {
-      let realtimeObj = [];
-      realtimeObj = new Object();
-      realtimeObj.temp = 0;
-      eval("realtimeObj." + topic + "=" + message);
-      realtimeSensor.push(realtimeObj);
-    }
+    // if (topic == "temp") {
+    //   let realtimeObj = [];
+    //   realtimeObj = new Object();
+    //   realtimeObj.temp = 0;
+    //   eval("realtimeObj." + topic + "=" + message);
+    //   realtimeSensor.push(realtimeObj);
+    // }
   }
 });
 // const auth = require("./app/routes/auth.routes");
