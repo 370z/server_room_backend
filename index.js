@@ -49,7 +49,7 @@ async function lineNotify(params, line_token) {
     },
   };
 
-  await axios.post(`${BASE_URL}${PATH}`, qs.stringify(params), options);
+  await axios.post(`${BASE_URL}${PATH}`, { message: params.message }, options);
 }
 
 const aedes = require("aedes")();
