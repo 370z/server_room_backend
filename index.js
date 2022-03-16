@@ -24,16 +24,18 @@ db.sequelize.sync();
 // });
 var line_token = "none";
 var notify_setting = null;
-async function getLineToken() {
+function getLineToken() {
   try {
-    const user = await User.findOne({
+    const user = await User.findByPk({
       where: {
-        username: "admin",
+        id: "1",
       },
     });
     if (user) {
-      this.line_token = user.line_token;
-      this.notify_setting = parseFloat(user.notify_setting);
+      return {
+        line_token: user.line_token,
+        notify_setting: parseFloat(user.notify_setting),
+      };
     }
   } catch (error) {
     console.log(error);
@@ -205,22 +207,25 @@ client.on("connect", function () {
 });
 
 client.on("message", function (topic, message, packet) {
-  console.log("notify_before", this.notify_setting);
-  console.log("token_before", this.line_token);
-  getLineToken();
-  console.log("notify_after", this.notify_setting);
-  console.log("token_after", this.line_token);
-  if (this.notify_setting != null) {
-    if (realtimeSensor.temp > this.notify_setting) {
-      lineNotify
-        .notify({
-          message: `ตอนนี้อุณหภูมิห้อง Server สูงกว่า ${notify_setting} องศา`,
-        })
-        .then(() => {
-          console.log("send completed!");
-        });
-    }
-  }
+  console.log("notify_before", notify_setting);
+  console.log("token_before", line_token);
+  getLineToken()
+    .then(() => {
+      if (notify_setting != null) {
+        if (realtimeSensor.temp > notify_setting) {
+          lineNotify
+            .notify({
+              message: `ตอนนี้อุณหภูมิห้อง Server สูงกว่า ${notify_setting} องศา`,
+            })
+            .then(() => {
+              console.log("send completed!");
+            });
+        }
+      }
+    })
+    .catch((error) => {
+      console.log(error);
+    });
 
   if (
     (topic && topic.match("hourtemp")) ||
