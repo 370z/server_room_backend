@@ -6,9 +6,12 @@ const db = require("./app/models");
 const Op = db.Sequelize.Op;
 const User = db.userData;
 const SensorData = db.sensorData;
-var line_token = "none";
+const axios = require("axios");
+const qs = require("querystring");
+const BASE_URL = "https://notify-api.line.me";
+const PATH = "/api/notify";
 // LINE notify
-var lineNotify = require("line-notify-nodejs")(line_token);
+// var lineNotify = require("line-notify-nodejs")(line_token);
 //mqtt client
 var mqtt = require("mqtt");
 
@@ -33,6 +36,21 @@ app.use(cors(corsOptions));
 app.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
+
+async function lineNotify(params, line_token) {
+  if (!params.message) {
+    throw new Error("message is required");
+  }
+
+  const options = {
+    headers: {
+      "Content-Type": "application/x-www-form-urlencoded",
+      Authorization: `Bearer ${line_token}`,
+    },
+  };
+
+  await axios.post(`${BASE_URL}${PATH}`, qs.stringify(params), options);
+}
 
 const aedes = require("aedes")();
 const server = require("net").createServer(aedes.handle);
@@ -185,21 +203,24 @@ client.on("connect", function () {
   console.log("Connected to MQTT Server");
 });
 
-client.on("message",async function (topic, message, packet) {
+client.on("message", async function (topic, message, packet) {
   if (topic === "temp") {
     try {
       const user = await User.findByPk(1);
       if (user) {
-        this.line_token= user.line_token;
-        console.log("message on query: ",message.toString(),user.notify_setting,message.toString()>user.notify_setting);
+        console.log(
+          "message on query: ",
+          message.toString(),
+          user.notify_setting,
+          message.toString() > user.notify_setting
+        );
         if (message.toString() > user.notify_setting) {
-          await lineNotify
-            .notify({
-              message: `ตอนนี้อุณหภูมิห้อง Server สูงกว่า ${user.notify_setting} องศา`,
-            })
-            .then(() => {
-              console.log("send completed!");
-            });
+          await lineNotify({
+            message: `ตอนนี้อุณหภูมิห้อง Server สูงกว่า ${user.notify_setting} องศา`,
+            line_token: user.line_token,
+          }).then(() => {
+            console.log("send completed!");
+          });
         }
       }
     } catch (error) {
