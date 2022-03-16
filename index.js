@@ -189,13 +189,12 @@ client.on("message",async function (topic, message, packet) {
     try {
       const user = await User.findByPk(1);
       if (user) {
-        console.log("User",user);
         lineNotify.token = user.line_token;
         console.log("message on query: ",message.toString(),user.notify_setting,message.toString()>user.notify_setting);
         if (message.toString() > user.notify_setting) {
           await lineNotify
             .notify({
-              message: `ตอนนี้อุณหภูมิห้อง Server สูงกว่า ${notify_setting} องศา`,
+              message: `ตอนนี้อุณหภูมิห้อง Server สูงกว่า ${user.notify_setting} องศา`,
             })
             .then(() => {
               console.log("send completed!");
