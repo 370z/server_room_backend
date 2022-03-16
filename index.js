@@ -38,6 +38,7 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 async function lineNotify(params) {
+  console.log(params);
   if (!params.message) {
     throw new Error("message is required");
   }
