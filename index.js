@@ -37,7 +37,7 @@ app.use(express.json());
 // parse requests of content-type - application/x-www-form-urlencoded
 app.use(express.urlencoded({ extended: true }));
 
-async function lineNotify(params, line_token) {
+async function lineNotify(params) {
   if (!params.message) {
     throw new Error("message is required");
   }
@@ -45,7 +45,7 @@ async function lineNotify(params, line_token) {
   const options = {
     headers: {
       "Content-Type": "application/x-www-form-urlencoded",
-      Authorization: `Bearer ${line_token}`,
+      Authorization: `Bearer ${params.line_token}`,
     },
   };
 
