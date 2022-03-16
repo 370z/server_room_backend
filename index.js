@@ -254,7 +254,7 @@ client.on("message", async function (topic, message, packet) {
     console.log("topic is " + topic);
     if (topic == "temp") {
       realtimeSensor = new Object();
-      device.temp = 0;
+      realtimeSensor.temp = 0;
       eval("realtimeSensor." + topic + "=" + message);
       realtimeSensor.push(realtimeSensor);
     }
