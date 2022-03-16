@@ -184,16 +184,16 @@ client.on("connect", function () {
   console.log("Connected to MQTT Server");
 });
 
-client.on("message", function (topic, message, packet) {
+client.on("message",async function (topic, message, packet) {
   if (topic === "temp") {
     try {
-      const user = User.findByPk(1);
+      const user = await User.findByPk(1);
       if (user) {
         console.log("User",user);
         lineNotify.token = user.line_token;
         console.log("message on query: ",message.toString(),user.notify_setting,message.toString()>user.notify_setting);
         if (message.toString() > user.notify_setting) {
-          lineNotify
+          await lineNotify
             .notify({
               message: `ตอนนี้อุณหภูมิห้อง Server สูงกว่า ${notify_setting} องศา`,
             })
