@@ -6,8 +6,6 @@ const db = require("./app/models");
 const Op = db.Sequelize.Op;
 const User = db.userData;
 const SensorData = db.sensorData;
-var line_token = "none";
-var notify_setting = null;
 
 //mqtt client
 var mqtt = require("mqtt");
@@ -24,14 +22,15 @@ db.sequelize.sync();
 //     console.log(error);
 //   }
 // });
-const getLineToken = async () => {
+var line_token = "none";
+var notify_setting = null;
+async function getLineToken() {
   try {
     const user = await User.findOne({
       where: {
         username: "admin",
       },
     });
-
     if (user) {
       this.line_token = user.line_token;
       this.notify_setting = parseFloat(user.notify_setting);
@@ -39,7 +38,7 @@ const getLineToken = async () => {
   } catch (error) {
     console.log(error);
   }
-};
+}
 
 // LINE notify
 const lineNotify = require("line-notify-nodejs")(line_token);
@@ -205,15 +204,15 @@ client.on("connect", function () {
   console.log("Connected to MQTT Server");
 });
 
-client.on("message", async function (topic, message, packet) {
-  console.log("notify_before",notify_setting);
-  console.log("token_before",line_token);
+client.on("message", function (topic, message, packet) {
+  console.log("notify_before", notify_setting);
+  console.log("token_before", line_token);
   await getLineToken();
-  console.log("notify_after",notify_setting);
-  console.log("token_after",line_token);
+  console.log("notify_after", notify_setting);
+  console.log("token_after", line_token);
   if (notify_setting != null) {
     if (realtimeSensor.temp > notify_setting) {
-      await lineNotify
+      lineNotify
         .notify({
           message: `ตอนนี้อุณหภูมิห้อง Server สูงกว่า ${notify_setting} องศา`,
         })
@@ -257,7 +256,7 @@ client.on("message", async function (topic, message, packet) {
     console.log("message is " + message);
     console.log("topic is " + topic);
     if (topic == "temp") {
-      let realtimeObj =[];
+      let realtimeObj = [];
       realtimeObj = new Object();
       realtimeObj.temp = 0;
       eval("realtimeObj." + topic + "=" + message);
