@@ -6,8 +6,9 @@ const db = require("./app/models");
 const Op = db.Sequelize.Op;
 const User = db.userData;
 const SensorData = db.sensorData;
+var line_token = "none";
 // LINE notify
-const lineNotify = require("line-notify-nodejs")();
+var lineNotify = require("line-notify-nodejs")(line_token);
 //mqtt client
 var mqtt = require("mqtt");
 
@@ -189,7 +190,7 @@ client.on("message",async function (topic, message, packet) {
     try {
       const user = await User.findByPk(1);
       if (user) {
-        lineNotify.token = user.line_token;
+        line_token= user.line_token;
         console.log("message on query: ",message.toString(),user.notify_setting,message.toString()>user.notify_setting);
         if (message.toString() > user.notify_setting) {
           await lineNotify
