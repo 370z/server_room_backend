@@ -190,7 +190,7 @@ client.on("message",async function (topic, message, packet) {
     try {
       const user = await User.findByPk(1);
       if (user) {
-        line_token= user.line_token;
+        this.line_token= user.line_token;
         console.log("message on query: ",message.toString(),user.notify_setting,message.toString()>user.notify_setting);
         if (message.toString() > user.notify_setting) {
           await lineNotify
