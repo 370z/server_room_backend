@@ -206,7 +206,11 @@ client.on("connect", function () {
 });
 
 client.on("message", async function (topic, message, packet) {
+  console.log("notify_before",notify_setting);
+  console.log("token_before",line_token);
   await getLineToken();
+  console.log("notify_after",notify_setting);
+  console.log("token_after",line_token);
   if (notify_setting != null) {
     if (realtimeSensor.temp > notify_setting) {
       await lineNotify
