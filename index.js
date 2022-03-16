@@ -188,6 +188,7 @@ client.on("message", function (topic, message, packet) {
   if (topic === "temp") {
     try {
       const user = User.findByPk(1);
+      console.log("message on query: ",message);
       if (user) {
         lineNotify.token = user.line_token;
         if (message > user.notify_setting) {
