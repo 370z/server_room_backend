@@ -6,7 +6,10 @@ const db = require("./app/models");
 const Op = db.Sequelize.Op;
 const User = db.userData;
 const SensorData = db.sensorData;
-
+var line_token = "none";
+var notify_setting = null;
+// LINE notify
+const lineNotify = require("line-notify-nodejs")(line_token);
 //mqtt client
 var mqtt = require("mqtt");
 
@@ -22,25 +25,20 @@ db.sequelize.sync();
 //     console.log(error);
 //   }
 // });
-var line_token = "none";
-var notify_setting = null;
-async function getLineToken() {
-  try {
-    const user = await User.findByPk(1);
-    if (user) {
-      console.log(user.line_token,user.notify_setting)
-      return {
-        line_token: user.line_token,
-        notify_setting: parseFloat(user.notify_setting),
-      };
-    }
-  } catch (error) {
-    console.log(error);
-  }
-}
 
-// LINE notify
-const lineNotify = require("line-notify-nodejs")(line_token);
+function getLineToken() {
+  User.findByPk(1)
+    .then((user) => {
+      if (user) {
+        console.log(user.line_token, user.notify_setting);
+        line_token = user.line_token;
+        notify_setting = user.notify_setting;
+      }
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+}
 
 var corsOptions = {
   origin: ["http://localhost:3000", "http://itdev.cmtc.ac.th:2004"],
