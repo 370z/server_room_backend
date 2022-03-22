@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js",
+    "start": "SET NODE_ENV=PRODUCTION&&nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
@@ -14,11 +14,12 @@
     "axios": "^0.26.1",
     "bcrypt": "^5.0.1",
     "cors": "^2.8.5",
+    "dotenv": "^16.0.0",
     "express": "^4.16.3",
     "jsonwebtoken": "^8.5.1",
-    "mosca": "^2.8.3",
-    "mysql": "^2.18.1",
+    "mqtt": "^4.3.7",
     "mysql2": "^2.3.3",
-    "sequelize": "^6.17.0"
+    "sequelize": "^6.17.0",
+    "websocket-stream": "^5.5.2"
   }
 }

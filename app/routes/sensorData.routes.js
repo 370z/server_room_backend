@@ -9,4 +9,5 @@ const {
 router.route("/sensorData").get(getSensorData);
 
 
+
 module.exports = router;

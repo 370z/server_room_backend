@@ -1,4 +1,5 @@
-const User = require("../models/userData.model");
+const db = require("../models");
+const User = db.userData;
 const ErrorHandler = require("../../utils/errorHandler");
 const catchAsyncErrors = require("../../middlewares/catchAsyncErrors");
 const sendToken = require("../../utils/jwtToken");
@@ -16,14 +17,14 @@ const sendToken = require("../../utils/jwtToken");
 
 // Login User => /api/v1/login
 exports.loginUser = catchAsyncErrors(async (req, res, next) => {
-  const { email, password } = req.body;
+  const { username, password } = req.body;
   //check email and password
-  if (!email || !password) {
+  if (!username || !password) {
     return next(new ErrorHandler("Please enter email & password", 400));
   }
   // Fining user in database
   const user = await User.findOne({
-    where: { email: email },
+    where: { username: username },
   })
 
   if (!user) {
@@ -46,3 +47,11 @@ exports.getUserProfile = catchAsyncErrors(async (req, res, next) => {
   });
 });
 
+
+exports.logout = catchAsyncErrors(async (req, res, next) => {
+  res.cookie("token", null, { expires: new Date(Date.now()), httpOnly: true });
+  res.status(200).json({
+    success: true,
+    message: "Logged out",
+  });
+});

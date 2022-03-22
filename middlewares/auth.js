@@ -1,4 +1,6 @@
-const User = require("../app/models/userData.model");
+
+const db = require("../app/models");
+const User = db.userData;
 
 const jwt = require("jsonwebtoken");
 const ErrorHandler = require("../utils/errorHandler");
@@ -13,7 +15,7 @@ exports.isAuthenticatedUser = catchAsyncErrors(async (req, res, next) => {
   }
   const bearer = bearerHeader.split(" ");
   const token = bearer[1];
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+  const decoded = jwt.verify(token, "zsdvgbsdafgwesry542w34t324ggDCwserv34");
   req.user = await User.findOne({
     where: {
       id:decoded.id

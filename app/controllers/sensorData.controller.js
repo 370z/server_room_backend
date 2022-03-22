@@ -10,4 +10,3 @@ exports.getSensorData = async (req, res, next) => {
     res.json(error)
   }
 };
-

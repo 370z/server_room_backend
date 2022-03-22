@@ -1,6 +1,10 @@
 const db = require("../models");
 const UserData = db.userData;
 const catchAsyncErrors = require("../../middlewares/catchAsyncErrors");
+const axios = require("axios");
+const qs = require("querystring");
+const BASE_URL = "https://notify-api.line.me";
+const PATH = "/api/notify";
 
 // Get all userdata => /api/v1/userData
 exports.getUserData = catchAsyncErrors(async (req, res, next) => {
@@ -28,7 +32,26 @@ exports.updateLineToken = catchAsyncErrors(async (req, res, next) => {
     { line_token: req.body.line_token },
     { where: { id: req.params.id } }
   );
-  return res.status(200).json({ success: true, updateToken });
+  try {
+    const sendLine = await axios.post(
+      `${BASE_URL}${PATH}`,
+      qs.stringify({
+        message: `เชื่อมต่อกับ Server Room Line Notify สำเร็จ`,
+      }),
+      {
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Bearer ${req.body.line_token}`,
+        },
+      }
+    );
+    if (sendLine.status == 200) {
+      return res.status(200).json({ success: true, updateToken });
+    }
+  } catch (error) {
+    return res.status(401).json({ success: false, message:error.message });
+    console.log(error)
+  }
 });
 
 exports.updateNotify = catchAsyncErrors(async (req, res, next) => {
@@ -46,4 +69,15 @@ exports.updateNotify = catchAsyncErrors(async (req, res, next) => {
     { where: { id: req.params.id } }
   );
   return res.status(200).json({ success: true, updateNotify });
+});
+
+exports.getNotifySettingForGuest = catchAsyncErrors(async (req, res, next) => {
+  try {
+    let notifySetting = await UserData.findAll({
+      attributes: ["notify_setting"],
+    });
+    res.json(notifySetting[0]);
+  } catch (error) {
+    res.json(error);
+  }
 });
