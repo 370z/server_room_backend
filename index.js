@@ -5,8 +5,8 @@ const app = express();
 const db = require("./app/models");
 
 const errorMiddleware = require("./middlewares/error");
-const aedes = require("aedes")();
-const { server, httpServer, ws } = require("./mqtt/server");
+
+const { server, httpServer, ws,aedes } = require("./mqtt/server");
 const mqttClient = require("./mqtt/client");
 const port = 1883;
 const wsPort = 8888;

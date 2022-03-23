@@ -95,4 +95,4 @@ const ws = require("websocket-stream");
 
 
 
-module.exports = {server,httpServer,ws};
+module.exports = {server,httpServer,ws,aedes};
