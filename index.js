@@ -15,10 +15,10 @@ db.sequelize.sync();
 // db.sequelize.sync({ force: true }).then(async () => {
 //   const user = {
 //     username: `admin`,
-//     password: "admin",
+//     password: "p@sswd2022",
 //   };
 //   try {
-//     await User.create(user);
+//     await db.userData.create(user);
 //   } catch (error) {
 //     console.log(error);
 //   }

@@ -2,7 +2,7 @@ module.exports = {
   HOST: "itdev.cmtc.ac.th",
   PORT: 3803,
   USER: "root",
-  PASSWORD: "iylbpkooNM@2022==",
+  PASSWORD: "iylbpkooNM@2022",
   DB: "server_room_temp",
   dialect: "mysql",
   timezone: "+07:00",
